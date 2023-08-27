@@ -6,24 +6,33 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\TasksRepository;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TasksRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext:['groups' => ['read:task:item', 'read:project:item']],
+    denormalizationContext:['groups' => ['create:task']]
+)]
+
 class Tasks
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:task:item'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:task:item', 'create:task'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['read:task:item', 'create:task'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:task:item', 'create:task'])]
     private ?string $status = null;
 
     #[ORM\Column]
@@ -33,6 +42,7 @@ class Tasks
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[Groups(['read:task:item', 'create:task'])]
     private ?Projects $projects = null;
 
     #[ORM\PrePersist]

@@ -3,6 +3,10 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
@@ -13,36 +17,52 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectsRepository::class)]
-#[ApiResource()]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read:project:collection']],
+    denormalizationContext: ['groups' => ['create:project']]
+)]
+#[Get(normalizationContext:['groups' => ['read:project:collection','read:project:item', 'read:task:item']])]
+#[GetCollection()]
+#[Post()]
+#[Put]
+
 class Projects
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:project:collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:project:collection', 'create:project'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['read:project:item', 'create:project', 'create:project'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:project:collection', 'create:project'])]
     private ?string $status = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['read:project:collection', 'create:project'])]
     private ?\DateTimeImmutable $deadline = null;
 
     #[ORM\Column]
+    #[Groups(['read:project:item'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'projects', targetEntity: Tasks::class)]
+    #[Groups(['read:project:item'])]
     private Collection $tasks;
 
-     public function __construct() {
+    public function __construct()
+    {
         $this->tasks = new ArrayCollection();
     }
 
@@ -54,7 +74,7 @@ class Projects
     }
 
     #[ORM\PreUpdate]
-    public function setUpdatedAtValue() : void
+    public function setUpdatedAtValue(): void
     {
         $this->updatedAt = new DateTimeImmutable();
     }
