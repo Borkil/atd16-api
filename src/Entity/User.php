@@ -4,9 +4,12 @@ namespace App\Entity;
 
 use DateTimeImmutable;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -22,7 +25,9 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[Get(
     normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:task:collection', 'read:project:collection']]
 )]
-
+#[GetCollection()]
+#[Post]
+#[Put]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
