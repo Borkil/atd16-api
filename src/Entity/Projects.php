@@ -18,10 +18,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: ProjectsRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read:project:collection']],
+    normalizationContext: ['groups' => ['read:project:collection', 'read:user:collection']],
     denormalizationContext: ['groups' => ['create:project']]
 )]
-#[Get(normalizationContext:['groups' => ['read:project:collection','read:project:item', 'read:task:item']])]
+#[Get(normalizationContext:['groups' => ['read:project:collection','read:project:item', 'read:task:collection', 'read:user:collection']])]
 #[GetCollection()]
 #[Post()]
 #[Put]
@@ -62,6 +62,7 @@ class Projects
     private Collection $tasks;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'projects')]
+    #[Groups(['read:project:collection'])]
     private Collection $contributor;
 
     public function __construct()
