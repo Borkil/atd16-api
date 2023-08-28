@@ -45,6 +45,10 @@ class Tasks
     #[Groups(['read:task:item', 'create:task'])]
     private ?Projects $projects = null;
 
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $owner = null;
+
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -131,6 +135,18 @@ class Tasks
     public function setProjects(?Projects $projects): static
     {
         $this->projects = $projects;
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
 
         return $this;
     }

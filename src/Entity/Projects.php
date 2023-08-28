@@ -61,9 +61,13 @@ class Projects
     #[Groups(['read:project:item'])]
     private Collection $tasks;
 
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'projects')]
+    private Collection $contributor;
+
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
+        $this->contributor = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -180,6 +184,33 @@ class Projects
             if ($task->getProjects() === $this) {
                 $task->setProjects(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getContributor(): Collection
+    {
+        return $this->contributor;
+    }
+
+    public function addContributor(User $contributor): static
+    {
+        if (!$this->contributor->contains($contributor)) {
+            $this->contributor->add($contributor);
+            $contributor->addProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContributor(User $contributor): static
+    {
+        if ($this->contributor->removeElement($contributor)) {
+            $contributor->removeProject($this);
         }
 
         return $this;
