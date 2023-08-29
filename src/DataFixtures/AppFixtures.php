@@ -17,6 +17,7 @@ class AppFixtures extends Fixture
         $faker= Factory::create();
 
         $users = [];
+        $projects = [];
 
         for ($i=0; $i < 5; $i++) { 
             $user = (new User())
@@ -33,8 +34,8 @@ class AppFixtures extends Fixture
         foreach ($users as $user) {
             for ($i=0; $i < rand(2, 8); $i++) { 
                 $task = (new Tasks())
-                        ->setName($faker->realTextBetween(20, 80))
-                        ->setDescription($faker->realTextBetween(50, 250))
+                        ->setName($faker->realTextBetween(15, 40))
+                        ->setDescription($faker->realTextBetween(30, 150))
                         ->setStatus('encours')
                         ->setOwner($user);
 
@@ -45,27 +46,31 @@ class AppFixtures extends Fixture
 
         for ($i=0; $i < 5; $i++) { 
             $project = (new Projects())
-                ->setName($faker->text(20, 50))
-                ->setDescription($faker->realTextBetween(20, 250))
+                ->setName($faker->text(10,30))
+                ->setDescription($faker->realTextBetween(20, 150))
                 ->setStatus('encours')
                 ->setDeadline(new DateTimeImmutable('+10days'));
-            
-            for($i=0; $i < rand(1,4); $i++) { 
-                $contributor = $users[rand(0,4)];
-                $project->addContributor($contributor);
-                for ($a=0; $a < rand(2,6) ; $a++) { 
-                    $task = (new Tasks())
-                        ->setName($faker->realTextBetween(20, 80))
-                        ->setDescription($faker->realTextBetween(50, 250))
-                        ->setStatus('encours')
-                        ->setOwner($contributor);
-                    $manager->persist($task);
-                    $project->addTask($task);
-                }
-            }
 
             $manager->persist($project);
+            $projects[]=$project;
             }
+        
+            foreach ($projects as $project) {
+                for($i=0; $i < rand(1,6); $i++) { 
+                    $contributor = $users[rand(0,4)];
+                    $project->addContributor($contributor);
+                    for ($a=0; $a < 3 ; $a++) { 
+                        $task = (new Tasks())
+                            ->setName($faker->realTextBetween(15, 40))
+                            ->setDescription($faker->realTextBetween(30, 150))
+                            ->setStatus('encours')
+                            ->setOwner($contributor);
+                        $manager->persist($task);
+                        $project->addTask($task);
+                    }
+                }
+            }
+            
 
         $manager->flush();
     }
