@@ -9,9 +9,17 @@ use DateTimeImmutable;
 use App\Entity\Projects;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private UserPasswordHasherInterface $hasher;
+
+    public function __construct(UserPasswordHasherInterface $hasher)
+    {
+        $this->hasher = $hasher;
+    }
+
     public function load(ObjectManager $manager): void
     {
         $faker= Factory::create();
@@ -22,10 +30,13 @@ class AppFixtures extends Fixture
         for ($i=0; $i < 5; $i++) { 
             $user = (new User())
             ->setEmail($faker->email())
-            ->setPassword('password')
             ->setLastname($faker->lastName())
             ->setFirstname($faker->firstName());
-            
+            $password = $this->hasher->hashPassword($user, 'password');
+
+            $user->setPassword($password);
+
+
             $manager->persist($user);
             $users[] = $user;
             

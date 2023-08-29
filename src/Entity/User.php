@@ -3,20 +3,32 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
 use Doctrine\ORM\Mapping as ORM;
+use App\State\UserPasswordHasher;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read:user:collection']]
+    normalizationContext: ['groups' => ['read:user:collection']],
+    denormalizationContext:['groups' => ['create:user']],
+    operations: [
+        new Post(processor: UserPasswordHasher::class),
+        new Put(processor: UserPasswordHasher::class),
+        new Patch(processor: UserPasswordHasher::class),
+    ]
 )]
+#[UniqueEntity('email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -26,6 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['create:user'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -37,10 +50,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Groups(['create:user'])]
+    private ?string $plainPassword = null;
+
     #[ORM\Column(length: 255)]
+    #[Groups(['create:user'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['create:user'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -124,13 +142,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
     /**
      * @see UserInterface
      */
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function getLastname(): ?string
