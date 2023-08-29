@@ -3,44 +3,64 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProjectsRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProjectsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read:project:collection']]
+)]
+#[Get(
+    normalizationContext: ['groups' => ['read:project:collection', 'read:project:item', 'read:task:collection' ]]
+)]
+#[GetCollection]
+#[Post]
+#[Put]
 class Projects
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:project:collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:project:collection'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['read:project:collection'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:project:collection'])]
     private ?string $status = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['read:project:collection'])]
     private ?\DateTimeImmutable $deadline = null;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'projects')]
+    #[Groups(['read:project:item'])]
+    private Collection $contributor;
+
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Tasks::class)]
+    #[Groups(['read:project:item'])]
+    private Collection $tasks;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
-
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'projects')]
-    private Collection $contributor;
-
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: Tasks::class)]
-    private Collection $tasks;
 
     public function __construct()
     {

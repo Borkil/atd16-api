@@ -31,17 +31,17 @@ class AppFixtures extends Fixture
             
         }
 
-        // foreach ($users as $user) {
-        //     for ($i=0; $i < rand(2, 8); $i++) { 
-        //         $task = (new Tasks())
-        //                 ->setName($faker->realTextBetween(15, 40))
-        //                 ->setDescription($faker->realTextBetween(30, 150))
-        //                 ->setStatus('encours')
-        //                 ->setOwner($user);
+        foreach ($users as $user) {
+            for ($i=0; $i < rand(2, 8); $i++) { 
+                $task = (new Tasks())
+                        ->setName($faker->realTextBetween(15, 40))
+                        ->setDescription($faker->realTextBetween(30, 150))
+                        ->setStatus('encours')
+                        ->setOwner($user);
 
-        //             $manager->persist($task);
-        //     }
-        // }
+                    $manager->persist($task);
+            }
+        }
 
 
         for ($i=0; $i < 5; $i++) { 

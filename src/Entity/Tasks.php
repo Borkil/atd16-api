@@ -2,41 +2,58 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use App\Repository\TasksRepository;
 use DateTimeImmutable;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\TasksRepository;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TasksRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read:task:collection', 'read:project:collection', 'read:user:collection']]
+)]
+#[Get]
+#[GetCollection]
+#[Post]
+#[Put]
 class Tasks
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read:task:collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:task:collection'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['read:task:collection'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['read:task:collection'])]
     private ?string $status = null;
+
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[Groups(['read:task:collection'])]
+    private ?Projects $project = null;
+
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['read:task:collection'])]
+    private ?User $owner = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
-
-    #[ORM\ManyToOne(inversedBy: 'tasks')]
-    private ?Projects $project = null;
-
-    #[ORM\ManyToOne(inversedBy: 'tasks')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $owner = null;
 
     public function __construct()
     {
