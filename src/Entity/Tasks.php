@@ -1,38 +1,28 @@
 <?php
+
 namespace App\Entity;
 
-use DateTimeImmutable;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\TasksRepository;
 use ApiPlatform\Metadata\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
+use App\Repository\TasksRepository;
+use DateTimeImmutable;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TasksRepository::class)]
-#[ORM\HasLifecycleCallbacks]
-#[ApiResource(
-    normalizationContext:['groups' => ['read:task:collection', 'read:project:item']],
-    denormalizationContext:['groups' => ['create:task']]
-)]
-
+#[ApiResource]
 class Tasks
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:task:collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:task:collection', 'create:task'])]
     private ?string $name = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['read:task:collection', 'create:task'])]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:task:collection', 'create:task'])]
     private ?string $status = null;
 
     #[ORM\Column]
@@ -42,26 +32,18 @@ class Tasks
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
-    #[Groups(['read:task:collection', 'create:task'])]
-    private ?Projects $projects = null;
+    private ?Projects $project = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
+    public function __construct()
     {
-        $this->createdAt = new DateTimeImmutable();
-        $this->updatedAt = new DateTimeImmutable();
+        $this->createdAt= new DateTimeImmutable();
+        $this->updatedAt= new DateTimeImmutable();
     }
 
-    #[ORM\PreUpdate]
-    public function setUpdatedAtValue() : void
-    {
-        $this->updatedAt = new DateTimeImmutable();
-    }
-    
     public function getId(): ?int
     {
         return $this->id;
@@ -84,7 +66,7 @@ class Tasks
         return $this->description;
     }
 
-    public function setDescription(?string $description): static
+    public function setDescription(string $description): static
     {
         $this->description = $description;
 
@@ -127,14 +109,14 @@ class Tasks
         return $this;
     }
 
-    public function getProjects(): ?Projects
+    public function getProject(): ?Projects
     {
-        return $this->projects;
+        return $this->project;
     }
 
-    public function setProjects(?Projects $projects): static
+    public function setProject(?Projects $project): static
     {
-        $this->projects = $projects;
+        $this->project = $project;
 
         return $this;
     }

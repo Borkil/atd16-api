@@ -2,46 +2,29 @@
 
 namespace App\Entity;
 
-use DateTimeImmutable;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\Post;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\HasLifecycleCallbacks]
 #[ORM\Table(name: '`user`')]
-#[ApiResource(
-    normalizationContext:['groups' => ['read:user:collection']]
-)]
-#[Get(
-    normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:task:collection', 'read:project:collection']]
-)]
-#[GetCollection()]
-#[Post]
-#[Put]
+#[ApiResource]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:user:collection'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['read:user:collection'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['read:user:collection'])]
     private array $roles = [];
 
     /**
@@ -51,10 +34,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:user:collection'])]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255)]#[Groups(['read:user:collection'])]
+    #[ORM\Column(length: 255)]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -63,30 +45,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Tasks::class, orphanRemoval: true)]
-    #[Groups(['read:user:item'])]
-    private Collection $tasks;
-
-    #[ORM\ManyToMany(targetEntity: Projects::class, inversedBy: 'contributor')]
-    #[Groups(['read:user:item'])]
+    #[ORM\ManyToMany(targetEntity: Projects::class, mappedBy: 'contributor')]
     private Collection $projects;
+
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Tasks::class, orphanRemoval: true)]
+    private Collection $tasks;
 
     public function __construct()
     {
-        $this->tasks = new ArrayCollection();
         $this->projects = new ArrayCollection();
-    }
-
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
-    {
+        $this->tasks = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
-        $this->updatedAt = new DateTimeImmutable();
-    }
-
-    #[ORM\PreUpdate]
-    public function setUpdatedAtValue(): void
-    {
         $this->updatedAt = new DateTimeImmutable();
     }
 
@@ -209,6 +178,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * @return Collection<int, Projects>
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Projects $project): static
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects->add($project);
+            $project->addContributor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Projects $project): static
+    {
+        if ($this->projects->removeElement($project)) {
+            $project->removeContributor($this);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return Collection<int, Tasks>
      */
     public function getTasks(): Collection
@@ -234,30 +230,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $task->setOwner(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Projects>
-     */
-    public function getProjects(): Collection
-    {
-        return $this->projects;
-    }
-
-    public function addProject(Projects $project): static
-    {
-        if (!$this->projects->contains($project)) {
-            $this->projects->add($project);
-        }
-
-        return $this;
-    }
-
-    public function removeProject(Projects $project): static
-    {
-        $this->projects->removeElement($project);
 
         return $this;
     }
