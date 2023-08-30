@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
 use App\Controller\MeController;
 use Doctrine\ORM\Mapping as ORM;
 use App\State\UserPasswordHasher;
@@ -31,6 +32,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
         new GetCollection(
             normalizationContext: ['groups' => ['read:user:collection']]
         ),
+        new Delete(),
         new Get(
             name: 'me',
             uriTemplate: '/me',
