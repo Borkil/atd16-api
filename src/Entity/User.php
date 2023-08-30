@@ -27,16 +27,17 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     operations: [
         new Post(processor: UserPasswordHasher::class),
         new Put(processor: UserPasswordHasher::class),
+        new Get(),
+        new GetCollection(
+            normalizationContext: ['groups' => ['read:user:collection']]
+        ),
         new Get(
             name: 'me',
             uriTemplate: '/me',
+            read:false,
             controller: MeController::class,
-            read: false,
             normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:project:collection', 'read:task:collection']]
         ),
-        new GetCollection(
-            normalizationContext: ['groups' => ['read:user:collection']]
-        )
     ],
 )]
 #[UniqueEntity('email')]
