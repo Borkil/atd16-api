@@ -6,12 +6,12 @@ use DateTimeImmutable;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Patch;
 use App\Controller\MeController;
 use Doctrine\ORM\Mapping as ORM;
 use App\State\UserPasswordHasher;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -32,7 +32,10 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             uriTemplate: '/me',
             controller: MeController::class,
             read: false,
-            normalizationContext: ['groups' => ['read:user:item', 'read:project:collection', 'read:task:collection']]
+            normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:project:collection', 'read:task:collection']]
+        ),
+        new GetCollection(
+            normalizationContext: ['groups' => ['read:user:collection']]
         )
     ],
 )]
@@ -46,11 +49,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['create:user', 'read:user:item'])]
+    #[Groups(['create:user', 'read:user:collection'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['read:user:item'])]
+    #[Groups(['read:user:collection'])]
     private array $roles = [];
 
     /**
@@ -63,11 +66,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['create:user', 'read:user:item'])]
+    #[Groups(['create:user', 'read:user:collection'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['create:user', 'read:user:item'])]
+    #[Groups(['create:user', 'read:user:collection'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
