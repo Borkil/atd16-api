@@ -3,9 +3,11 @@
 namespace App\Entity;
 
 use DateTimeImmutable;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Patch;
+use App\Controller\MeController;
 use Doctrine\ORM\Mapping as ORM;
 use App\State\UserPasswordHasher;
 use App\Repository\UserRepository;
@@ -25,8 +27,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     operations: [
         new Post(processor: UserPasswordHasher::class),
         new Put(processor: UserPasswordHasher::class),
-        new Patch(processor: UserPasswordHasher::class),
-    ]
+        new Get(
+            name: 'me',
+            uriTemplate: '/me',
+            controller: MeController::class,
+            read: false,
+            normalizationContext: ['groups' => ['read:user:item', 'read:project:collection', 'read:task:collection']]
+        )
+    ],
 )]
 #[UniqueEntity('email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -34,14 +42,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:user:collection'])]
+    #[Groups(['read:user:collection', 'read:user:item'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['create:user'])]
+    #[Groups(['create:user', 'read:user:item'])]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['read:user:item'])]
     private array $roles = [];
 
     /**
@@ -54,11 +63,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['create:user'])]
+    #[Groups(['create:user', 'read:user:item'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['create:user'])]
+    #[Groups(['create:user', 'read:user:item'])]
     private ?string $firstname = null;
 
     #[ORM\Column]
@@ -68,9 +77,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToMany(targetEntity: Projects::class, mappedBy: 'contributor')]
+    #[Groups(['read:user:item'])]
     private Collection $projects;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Tasks::class, orphanRemoval: true)]
+    #[Groups(['read:user:item'])]
     private Collection $tasks;
 
     public function __construct()
