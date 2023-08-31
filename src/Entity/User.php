@@ -38,7 +38,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
             uriTemplate: '/me',
             read:false,
             controller: MeController::class,
-            normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:project:collection', 'read:task:collection']]
+            normalizationContext: ['groups' => ['read:user:collection', 'read:user:item', 'read:project:me', 'read:task:me']]
         ),
     ],
 )]

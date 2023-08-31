@@ -27,23 +27,23 @@ class Tasks
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:task:collection'])]
+    #[Groups(['read:task:collection', 'read:task:me'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:task:collection'])]
+    #[Groups(['read:task:collection', 'read:task:me'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['read:task:collection'])]
+    #[Groups(['read:task:collection', 'read:task:me'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:task:collection'])]
+    #[Groups(['read:task:collection', 'read:task:me'])]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
-    #[Groups(['read:task:collection'])]
+    #[Groups(['read:task:collection', 'read:task:me'])]
     private ?Projects $project = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
