@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProjectsRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read:project:collection']]
+    normalizationContext: ['groups' => ['read:project:collection', 'read:user:collection']]
 )]
 #[Get(
     normalizationContext: ['groups' => ['read:project:collection', 'read:project:item', 'read:task:collection' ]]
