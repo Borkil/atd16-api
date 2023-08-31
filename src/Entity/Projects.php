@@ -6,10 +6,10 @@ use DateTimeImmutable;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProjectsRepository;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -49,7 +49,7 @@ class Projects
     private ?\DateTimeImmutable $deadline = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'projects')]
-    #[Groups(['read:project:item'])]
+    #[Groups(['read:project:collection'])]
     private Collection $contributor;
 
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: Tasks::class)]
