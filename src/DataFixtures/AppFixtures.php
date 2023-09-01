@@ -47,7 +47,7 @@ class AppFixtures extends Fixture
                 $task = (new Tasks())
                         ->setName($faker->realTextBetween(15, 40))
                         ->setDescription($faker->realTextBetween(30, 150))
-                        ->setStatus('encours')
+                        ->setStatus('active')
                         ->setOwner($user);
 
                     $manager->persist($task);

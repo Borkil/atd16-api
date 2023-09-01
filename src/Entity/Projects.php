@@ -57,6 +57,7 @@ class Projects
     private Collection $tasks;
 
     #[ORM\Column]
+    #[Groups(['read:project:collection'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
